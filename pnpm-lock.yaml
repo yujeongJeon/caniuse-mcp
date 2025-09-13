@@ -7,6 +7,13 @@ settings:
 importers:
 
   .:
+    dependencies:
+      fastmcp:
+        specifier: ^3.17.0
+        version: 3.17.0
+      zod:
+        specifier: <4.0.0
+        version: 3.25.76
     devDependencies:
       '@naverpay/eslint-config':
         specifier: ^2.3.1
@@ -41,9 +48,6 @@ importers:
       '@typescript-eslint/parser':
         specifier: ^8.43.0
         version: 8.43.0(eslint@9.35.0)(typescript@5.9.2)
-      fastmcp:
-        specifier: ^3.17.0
-        version: 3.17.0
       semantic-release:
         specifier: ^24.2.8
         version: 24.2.8(typescript@5.9.2)

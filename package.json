@@ -13,7 +13,11 @@
     "bin": "./dist/index.js",
     "type": "module",
     "scripts": {
-        "test": "echo \"Error: no test specified\" && exit 1"
+        "build": "tsup",
+        "format": "prettier --write .",
+        "lint": "eslint . --ext .js,.ts",
+        "lint:fix": "eslint . --ext .js,.ts --fix",
+        "start": "node dist/index.js"
     },
     "keywords": [
         "mcp",
@@ -34,7 +38,6 @@
         "@types/node": "^24.3.3",
         "@typescript-eslint/eslint-plugin": "^8.43.0",
         "@typescript-eslint/parser": "^8.43.0",
-        "fastmcp": "^3.17.0",
         "semantic-release": "^24.2.8",
         "tsup": "^8.5.0",
         "typescript": "^5.9.2"
@@ -55,5 +58,9 @@
         "splitting": true,
         "sourcemap": true,
         "clean": true
+    },
+    "dependencies": {
+        "fastmcp": "^3.17.0",
+        "zod": "<4.0.0"
     }
 }
