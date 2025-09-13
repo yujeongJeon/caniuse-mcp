@@ -1,6 +1,6 @@
 {
     "name": "caniuse-mcp",
-    "version": "1.0.0",
+    "version": "0.0.0",
     "description": "A MCP Server Plugin that provides caniuse.com data to clients.",
     "exports": {
         ".": {
