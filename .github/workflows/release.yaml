@@ -1,8 +1,9 @@
 name: Release
 on:
-    # push:
-    #     branches:
-    #         - main
+    push:
+        branches:
+            - alpha
+            - rc
     workflow_dispatch:
 
 jobs:
