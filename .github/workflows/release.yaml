@@ -4,7 +4,7 @@ on:
         branches:
             - alpha
             - rc
-    workflow_dispatch:
+    workflow_dispatch: {}
 
 jobs:
     release:

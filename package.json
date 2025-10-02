@@ -1,7 +1,15 @@
 {
     "name": "caniuse-mcp",
     "version": "1.0.0-alpha.1",
-    "description": "A MCP Server Plugin that provides caniuse.com data to clients.",
+    "description": "MCP server providing browser compatibility data and web API support information using caniuse database",
+    "keywords": [
+        "mcp",
+        "caniuse",
+        "caniuse-mcp"
+    ],
+    "license": "MIT",
+    "author": "yujeongJeon <workingnewjeong@gmail.com>",
+    "type": "module",
     "exports": {
         ".": {
             "import": "./dist/index.js",
@@ -11,21 +19,19 @@
     "main": "./dist/index.js",
     "types": "./dist/index.d.ts",
     "bin": "./dist/index.js",
-    "type": "module",
     "scripts": {
         "build": "tsup",
-        "format": "prettier --write .",
+        "fix": "pnpm lint:fix && pnpm prettier:fix",
         "lint": "eslint . --ext .js,.ts",
         "lint:fix": "eslint . --ext .js,.ts --fix",
+        "prettier": "prettier --check .",
+        "prettier:fix": "prettier --write .",
         "start": "node dist/index.js"
     },
-    "keywords": [
-        "mcp",
-        "caniuse",
-        "caniuse-mcp"
-    ],
-    "author": "yujeongJeon <workingnewjeong@gmail.com>",
-    "license": "MIT",
+    "dependencies": {
+        "fastmcp": "^3.17.0",
+        "zod": "^3.25.76"
+    },
     "devDependencies": {
         "@naverpay/eslint-config": "^2.3.1",
         "@naverpay/prettier-config": "^1.0.1",
@@ -38,6 +44,7 @@
         "@types/node": "^24.3.3",
         "@typescript-eslint/eslint-plugin": "^8.43.0",
         "@typescript-eslint/parser": "^8.43.0",
+        "eslint": "^9.36.0",
         "semantic-release": "^24.2.8",
         "tsup": "^8.5.0",
         "typescript": "^5.9.2"
@@ -58,9 +65,5 @@
         "splitting": true,
         "sourcemap": true,
         "clean": true
-    },
-    "dependencies": {
-        "fastmcp": "^3.17.0",
-        "zod": "<4.0.0"
     }
 }
