@@ -58,7 +58,7 @@
     },
     "packageManager": "pnpm@10.6.5",
     "engines": {
-        "node": "^22.14.0",
+        "node": ">=20.0.0",
         "pnpm": "10.6.5"
     },
     "readme": "https://github.com/yujeongJeon/caniuse-mcp/blob/main/README.md",
