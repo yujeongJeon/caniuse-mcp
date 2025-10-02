@@ -1,3 +1,10 @@
+## [1.0.1](https://github.com/yujeongJeon/caniuse-mcp/compare/v1.0.0...v1.0.1) (2025-10-02)
+
+
+### Bug Fixes
+
+* improve user prompt for caniuse feature selection with clearer language ([7ad2939](https://github.com/yujeongJeon/caniuse-mcp/commit/7ad2939e736aa849eb7829bb926e203de093bd85))
+
 # 1.0.0 (2025-10-02)
 
 
