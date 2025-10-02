@@ -118,16 +118,16 @@ const executeCaniuse = async ({feature}: CaniUseInputSchema, {session}: FastMCPC
                     role: 'user',
                     content: {
                         type: 'text',
-                        text: `다음 caniuse 검색 키워드 중 ${feature}의 의도와 가까운 것을 선별해줘:\n\n${queries.featureIds.join(
+                        text: `Please select the caniuse search keywords that are closest to the intent of "${feature}" from the following options:\n\n${queries.featureIds.join(
                             ', ',
-                        )}\n\n응답 형식: 선택된 키워드들을 콤마로 구분하여 나열`,
+                        )}\n\nResponse format: List the selected keywords separated by commas`,
                     },
                 },
             ],
             systemPrompt: `You are a web compatibility expert specializing in caniuse.com data. 
             
-    RESPONSE FORMAT: Return only the selected feature IDs separated by commas, no explanations.
-    Example: "flexbox, grid-layout, css-variables"`,
+        RESPONSE FORMAT: Return only the selected feature IDs separated by commas, no explanations.
+        Example: "flexbox, grid-layout, css-variables"`,
             maxTokens: 120,
             temperature: 0.1,
             stopSequences: ['\n', '.'],
