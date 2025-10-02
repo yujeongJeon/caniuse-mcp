@@ -7,6 +7,11 @@
         "caniuse",
         "caniuse-mcp"
     ],
+    "homepage": "https://github.com/yujeongJeon/caniuse-mcp",
+    "bugs": {
+        "email": "workingnewjeong@gmail.com",
+        "url": "https://github.com/yujeongJeon/caniuse-mcp/issues"
+    },
     "license": "MIT",
     "author": "yujeongJeon <workingnewjeong@gmail.com>",
     "type": "module",
@@ -19,6 +24,9 @@
     "main": "./dist/index.js",
     "types": "./dist/index.d.ts",
     "bin": "./dist/index.js",
+    "files": [
+        "dist"
+    ],
     "scripts": {
         "build": "tsup",
         "fix": "pnpm lint:fix && pnpm prettier:fix",
@@ -53,6 +61,7 @@
         "node": "^22.14.0",
         "pnpm": "10.6.5"
     },
+    "readme": "https://github.com/yujeongJeon/caniuse-mcp/blob/main/README.md",
     "tsup": {
         "entry": [
             "src/index.ts"
