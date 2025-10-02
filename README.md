@@ -11,6 +11,10 @@ A Model Context Protocol (MCP) server providing browser compatibility data and w
 - **Feature Search**: Look up web features by name using the comprehensive caniuse database
 - **Always Up-to-Date**: Queries the latest compatibility data from the caniuse database in real-time
 - **MCP Compatible**: Works seamlessly with any MCP-compatible client
+- **Smart Feature Sampling**: Provides accurate compatibility data through intelligent sampling of feature variants and edge cases
+
+> [!NOTE]
+> However, some MCP clients may not support sampling features, which could affect the comprehensiveness of the compatibility information returned.
 
 ## Installation
 
