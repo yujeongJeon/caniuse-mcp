@@ -106,7 +106,7 @@ const executeCaniuse = async ({feature}: CaniUseInputSchema, {session}: FastMCPC
     // 1. caniuse.com 검색 API로 feature ID들 가져오기
     const queries = await fetchCanIUseData(feature)
 
-    if (typeof session.requestSampling === 'function') {
+    if (session?.clientCapabilities?.sampling && typeof session?.requestSampling === 'function') {
         const response: {
             content: AudioContent | ImageContent | TextContent
             model: string
@@ -160,7 +160,7 @@ const executeCaniuse = async ({feature}: CaniUseInputSchema, {session}: FastMCPC
 }
 
 export const caniuseTool = {
-    name: 'caniuse-feature',
+    name: 'caniuse_feature',
     description: `Look up the compatibility of web features across different browsers using data from caniuse.com.`,
     parameters: caniuseInputSchema,
     execute: executeCaniuse,

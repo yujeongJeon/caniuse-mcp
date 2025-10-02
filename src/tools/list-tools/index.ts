@@ -4,7 +4,7 @@ import type {ToolRegistry} from '../registry.js'
 
 export function createListToolsTool(registry: ToolRegistry) {
     return {
-        name: 'list-tools',
+        name: 'list_tools',
         description: 'List all available tools and their descriptions',
         parameters: z.object({}),
         execute: async () => {

@@ -2,7 +2,7 @@ import type {FastMCP} from 'fastmcp'
 import type {ZodSchema} from 'zod'
 
 export interface FastMCPContext {
-    session: FastMCP['sessions'][number]
+    session?: FastMCP['sessions'][number]
 }
 export interface ToolDefinition {
     name: string
@@ -25,7 +25,7 @@ export class ToolRegistry {
                 description: tool.description,
                 parameters: tool.parameters,
                 execute: async (params) => {
-                    return await tool.execute(params, {session: server.sessions[0]})
+                    return await tool.execute(params, {session: server.sessions?.[0]})
                 },
             })
         }
