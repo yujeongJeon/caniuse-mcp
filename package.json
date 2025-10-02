@@ -1,6 +1,6 @@
 {
     "name": "caniuse-mcp",
-    "version": "1.0.0-alpha.1",
+    "version": "1.0.0",
     "description": "MCP server providing browser compatibility data and web API support information using caniuse database",
     "keywords": [
         "mcp",
