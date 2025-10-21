@@ -1,13 +1,13 @@
 import {caniuseInputSchema, type CaniUseInputSchema} from './schema.js'
-import {fetchCanIUseData} from '../../lib/caniuse-api.js'
+import {fetchCanIUse, fetchCanIUseQueries} from '../../lib/caniuse-api.js'
 import {
     groupBrowserVersions,
     CANIUSE_MAIN_BROWSERS,
     type FeatureData,
     type GroupedVersionSupport,
 } from '../../lib/caniuse-db.js'
-import {DATA_SOURCES} from '../../lib/consts.js'
 import {
+    fetchMDNData,
     getNestedProperty,
     MDN_MAIN_BROWSERS,
     mdnIdToBcdPath,
@@ -32,15 +32,10 @@ async function searchAndFetchCompatData(featureIds: string[]): Promise<Compatibi
     const results: CompatibilityResult[] = []
 
     // caniuse-db 데이터 로드
-    const caniuseData = await fetch(DATA_SOURCES.caniuse).then((r) => r.json())
+    const caniuseData = await fetchCanIUse()
 
     // MDN 데이터 로드
-    const mdnData = await fetch(DATA_SOURCES.mdn, {
-        cache: 'force-cache',
-        headers: {
-            'Cache-Control': 'max-age=2592000',
-        },
-    }).then((r) => r.json())
+    const mdnData = await fetchMDNData()
 
     for (const featureId of featureIds) {
         if (featureId.startsWith('mdn-')) {
@@ -104,7 +99,7 @@ async function searchAndFetchCompatData(featureIds: string[]): Promise<Compatibi
 
 const executeCaniuse = async ({feature}: CaniUseInputSchema, {session}: FastMCPContext) => {
     // 1. caniuse.com 검색 API로 feature ID들 가져오기
-    const queries = await fetchCanIUseData(feature)
+    const queries = await fetchCanIUseQueries(feature)
 
     if (session?.clientCapabilities?.sampling && typeof session?.requestSampling === 'function') {
         const response: {

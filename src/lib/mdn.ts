@@ -1,5 +1,6 @@
-import type {SupportStatus} from './consts.js'
+import {DATA_SOURCES, type SupportStatus} from './consts.js'
 
+export const MDN_MAIN_BROWSERS = ['chrome', 'edge', 'safari', 'firefox', 'safari_ios', 'chrome_android']
 interface MDNSupport {
     version_added: string | boolean | null
     version_removed?: string | boolean
@@ -74,8 +75,6 @@ export function parseMDNSupport(browserSupport: MDNSupport | MDNSupport[] | stri
     })
 }
 
-export const MDN_MAIN_BROWSERS = ['chrome', 'edge', 'safari', 'firefox', 'safari_ios', 'chrome_android']
-
 // 중첩된 경로로 객체 접근 헬퍼
 export function getNestedProperty(obj: any, path: string): any {
     const keys = path.split('.')
@@ -143,4 +142,14 @@ export function mdnIdToBcdPath(mdnId: string): string {
     path = path.replace(/@@/g, '_')
 
     return path
+}
+
+export async function fetchMDNData() {
+    const mdnData = await fetch(DATA_SOURCES.mdn, {
+        cache: 'force-cache',
+        headers: {
+            'Cache-Control': 'max-age=2592000',
+        },
+    }).then((r) => r.json())
+    return mdnData
 }

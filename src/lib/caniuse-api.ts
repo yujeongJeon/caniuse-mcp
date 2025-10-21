@@ -1,4 +1,6 @@
-export async function fetchCanIUseData(feature: string): Promise<{
+import {DATA_SOURCES} from './consts.js'
+
+export async function fetchCanIUseQueries(feature: string): Promise<{
     featureIds: string[]
 }> {
     // actual API endpoint used by caniuse.com
@@ -13,4 +15,9 @@ https://caniuse.com/process/query.php?search=${feature}`,
         },
     )
     return await response.json()
+}
+
+export async function fetchCanIUse() {
+    const caniuseData = await fetch(DATA_SOURCES.caniuse).then((r) => r.json())
+    return caniuseData
 }
