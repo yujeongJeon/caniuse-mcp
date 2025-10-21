@@ -30,6 +30,7 @@
     "scripts": {
         "build": "tsup",
         "fix": "pnpm lint:fix && pnpm prettier:fix",
+        "inspect": "npx @modelcontextprotocol/inspector node ./dist/index.js",
         "lint": "eslint . --ext .js,.ts",
         "lint:fix": "eslint . --ext .js,.ts --fix",
         "prettier": "prettier --check .",
@@ -40,6 +41,7 @@
         "zod": "^3.25.76"
     },
     "devDependencies": {
+        "@modelcontextprotocol/inspector": "^0.17.0",
         "@naverpay/eslint-config": "^2.3.1",
         "@naverpay/prettier-config": "^1.0.1",
         "@semantic-release/changelog": "^6.0.3",
