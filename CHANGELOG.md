@@ -1,3 +1,19 @@
+# [1.1.0](https://github.com/yujeongJeon/caniuse-mcp/compare/v1.0.1...v1.1.0) (2025-11-16)
+
+
+### Bug Fixes
+
+* update dependencies in package.json and pnpm-lock.yaml ([4bd3552](https://github.com/yujeongJeon/caniuse-mcp/commit/4bd35524d2388cce1be54db5bb634ad2aa73c7d8))
+
+
+### Features
+
+* add Browserslist API response type and parsing function ([c5cc60c](https://github.com/yujeongJeon/caniuse-mcp/commit/c5cc60c02df012b4f514025cb5d92fb065be14d0))
+* add browserslist compatibility check tool with input schema and loading logic ([09c4a6b](https://github.com/yujeongJeon/caniuse-mcp/commit/09c4a6b805d9f18fd9d73ca0bfc2f5995d131768))
+* add web features support with fetching logic and compatibility mapping ([c8f8c8e](https://github.com/yujeongJeon/caniuse-mcp/commit/c8f8c8ecdd958630f68583e995dc1d06255ebda8))
+* enhance error handling in fetch functions for CanIUse and MDN data ([f24e834](https://github.com/yujeongJeon/caniuse-mcp/commit/f24e834a93cfeaf209d905e0d34b2d2e75092fbf))
+* implement compatibility check tool with browserslist integration and data fetching logic ([a4fc154](https://github.com/yujeongJeon/caniuse-mcp/commit/a4fc15487a2ce6b85be6ed5712f61d5c0e3e7863))
+
 # [1.1.0-alpha.2](https://github.com/yujeongJeon/caniuse-mcp/compare/v1.1.0-alpha.1...v1.1.0-alpha.2) (2025-11-16)
 
 
