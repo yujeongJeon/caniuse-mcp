@@ -7,9 +7,11 @@ A Model Context Protocol (MCP) server providing browser compatibility data and w
 
 ## Features
 
+- **Multiple Data Sources**: Combines data from CanIUse, MDN BCD, and Web Features for comprehensive compatibility information
 - **Browser Compatibility Data**: Get detailed compatibility information for web features across all major browsers
-- **Feature Search**: Look up web features by name using the comprehensive caniuse database
-- **Always Up-to-Date**: Queries the latest compatibility data from the caniuse database in real-time
+- **Baseline Status**: See Web Features baseline status (high/low) for modern browser support
+- **Feature Search**: Look up web features by name using comprehensive databases
+- **Always Up-to-Date**: Queries the latest compatibility data in real-time
 - **MCP Compatible**: Works seamlessly with any MCP-compatible client
 - **Smart Feature Sampling**: Provides accurate compatibility data through intelligent sampling of feature variants and edge cases
 
@@ -78,13 +80,28 @@ Please tell me the scope of the "promises" browser support.
 
 **Response:**
 
-Returns detailed compatibility information including:
+Returns detailed compatibility information from multiple sources:
+
+**CanIUse Data:**
 
 - Support status for major browsers: Chrome, Firefox, Safari, Edge, iOS Safari, Chrome Android
-- Version ranges where the feature is supported
-- Partial support information
+- Version-specific support information
+- Partial support details
 - Notes about implementation differences
 - Polyfill availability
+
+**Web Features Data:**
+
+- Baseline status (high/low/false) indicating cross-browser support maturity
+- Related MDN documentation IDs
+- Specification links
+- Modern browser support information
+
+**MDN Browser Compatibility Data:**
+
+- Detailed API/feature support
+- Experimental and deprecated status
+- Standard track information
 
 #### 2. `list_tools`
 
@@ -158,13 +175,15 @@ src/
 ├── lib/
 │   ├── caniuse-api.ts    # Caniuse API client
 │   ├── caniuse-db.ts     # Data processing utilities
+│   ├── compat-utils.ts   # Multi-source compatibility data aggregation
 │   ├── consts.ts         # Constants and configuration
-│   └── mdn.ts            # MDN compatibility data
+│   ├── mdn.ts            # MDN compatibility data
+│   └── web-features.ts   # Web Features baseline data
 └── tools/
     ├── index.ts          # Tools registry
     ├── registry.ts       # Tool registration system
     ├── caniuse/
-    │   ├── index.ts      # Caniuse feature lookup tool
+    │   ├── index.ts      # Multi-source feature lookup tool
     │   └── schema.ts     # Input validation schemas
     └── list-tools/
         └── index.ts      # Tools listing functionality
@@ -224,9 +243,14 @@ This project is licensed under the MIT License
 This MCP server combines compatibility data from multiple authoritative sources:
 
 - **[Caniuse.com](https://caniuse.com/)** - Comprehensive browser support tables for web technologies
+- **[Web Features](https://github.com/web-platform-dx/web-features)** - Baseline status and cross-browser feature availability
 - **[MDN Browser Compatibility Data](https://github.com/mdn/browser-compat-data)** - Mozilla's detailed compatibility database
 
-By leveraging both data sources, the server provides more complete and accurate browser compatibility information for web developers.
+By leveraging these three complementary data sources, the server provides the most complete and accurate browser compatibility information for web developers:
+
+- **CanIUse** provides detailed version-by-version support history
+- **Web Features** offers baseline status to quickly understand cross-browser maturity
+- **MDN BCD** adds specification details and experimental/deprecated flags
 
 ## References
 
