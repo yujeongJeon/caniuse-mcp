@@ -1,3 +1,11 @@
+## [1.1.1](https://github.com/yujeongJeon/caniuse-mcp/compare/v1.1.0...v1.1.1) (2025-11-16)
+
+
+### Bug Fixes
+
+* enhance version comparison and add range support in compatibility checks ([d1a64b5](https://github.com/yujeongJeon/caniuse-mcp/commit/d1a64b55bd3f2218dd1a8fc88ae3bca6a4e7985a))
+* improve target browsers display format for compatibility results ([06a053a](https://github.com/yujeongJeon/caniuse-mcp/commit/06a053a51ef316b4a0382dc749abc58a21b91028))
+
 # [1.1.0](https://github.com/yujeongJeon/caniuse-mcp/compare/v1.0.1...v1.1.0) (2025-11-16)
 
 
