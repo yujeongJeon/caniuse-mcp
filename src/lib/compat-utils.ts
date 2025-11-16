@@ -24,11 +24,7 @@ export interface CompatibilityResult {
     description?: string
     support: Record<string, Record<string, string>> // browser -> { version: status }
     status?: any
-    baseline?: {
-        status: 'high' | 'low' | false
-        lowDate?: string
-        highDate?: string
-    }
+    baseline_status?: 'high' | 'low' | false
     relatedFeatures?: {
         mdn?: string[] // Related MDN BCD identifiers
     }
@@ -138,11 +134,7 @@ export async function searchAndFetchCompatData(featureIds: string[]): Promise<Co
                     description: webFeature.description,
                     path: Array.isArray(webFeature.spec) ? webFeature.spec[0] : webFeature.spec,
                     support,
-                    baseline: {
-                        status: webFeature.status.baseline,
-                        lowDate: webFeature.status.baseline_low_date,
-                        highDate: webFeature.status.baseline_high_date,
-                    },
+                    baseline_status: webFeature.status.baseline,
                     relatedFeatures: mdnIds.length > 0 ? {mdn: mdnIds} : undefined,
                 })
             }
