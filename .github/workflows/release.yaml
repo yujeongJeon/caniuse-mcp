@@ -46,6 +46,11 @@ jobs:
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
             - name: Publish to NPM (OIDC)
-              run: npm publish --provenance --access public
+              run: |
+                  if [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
+                    npm publish --provenance --access public
+                  else
+                    npm publish --provenance --access public --tag alpha
+                  fi
               env:
                   NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
