@@ -9,40 +9,12 @@ import {
     fetchMDNData,
     getNestedProperty,
     MDN_MAIN_BROWSERS,
+    MDN_TO_CANIUSE_BROWSER_MAP,
     mdnIdToBcdPath,
     parseMDNSupport,
     type SimplifiedMDNSupport,
 } from './mdn.js'
-import {fetchWebFeatures} from './web-features.js'
-
-/**
- * Map MDN browser names to CanIUse browser names
- * MDN uses: safari_ios, chrome_android
- * CanIUse uses: ios_saf, and_chr
- */
-const MDN_TO_CANIUSE_BROWSER_MAP: Record<string, string> = {
-    chrome: 'chrome',
-    edge: 'edge',
-    safari: 'safari',
-    firefox: 'firefox',
-    safari_ios: 'ios_saf',
-    chrome_android: 'and_chr',
-}
-
-const WEBFEATURES_TO_CANIUSE_BROWSER_MAP: Record<string, string> = {
-    chrome: 'chrome',
-    edge: 'edge',
-    safari: 'safari',
-    firefox: 'firefox',
-    safari_ios: 'ios_saf',
-    chrome_android: 'and_chr',
-    // firefox_android는 CANIUSE_MAIN_BROWSERS에 없으므로 제외
-}
-
-export interface WebFeatureVersionSupport {
-    sinceVersion: string // "76", "13", etc.
-    status: 'supported'
-}
+import {fetchWebFeatures, WEBFEATURES_TO_CANIUSE_BROWSER_MAP, type WebFeatureVersionSupport} from './web-features.js'
 
 export interface CompatibilityResult {
     source: 'caniuse' | 'mdn' | 'web-features'

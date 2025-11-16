@@ -1,6 +1,16 @@
 import {DATA_SOURCES, type SupportStatus} from './consts.js'
 
 export const MDN_MAIN_BROWSERS = ['chrome', 'edge', 'safari', 'firefox', 'safari_ios', 'chrome_android']
+
+export const MDN_TO_CANIUSE_BROWSER_MAP: Record<string, string> = {
+    chrome: 'chrome',
+    edge: 'edge',
+    safari: 'safari',
+    firefox: 'firefox',
+    safari_ios: 'ios_saf',
+    chrome_android: 'and_chr',
+}
+
 interface MDNSupport {
     version_added: string | boolean | null
     version_removed?: string | boolean

@@ -1,3 +1,17 @@
+export const WEBFEATURES_TO_CANIUSE_BROWSER_MAP: Record<string, string> = {
+    chrome: 'chrome',
+    edge: 'edge',
+    safari: 'safari',
+    firefox: 'firefox',
+    safari_ios: 'ios_saf',
+    chrome_android: 'and_chr',
+}
+
+export interface WebFeatureVersionSupport {
+    sinceVersion: string
+    status: 'supported'
+}
+
 export interface WebFeatureSupport {
     chrome?: string
     chrome_android?: string
