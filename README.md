@@ -103,7 +103,40 @@ Returns detailed compatibility information from multiple sources:
 - Experimental and deprecated status
 - Standard track information
 
-#### 2. `list_tools`
+#### 2. `browserslist_compatibility_check`
+
+Check web feature compatibility against your browserslist configuration.
+
+**Parameters:**
+
+- `feature` (string): The feature to check compatibility for
+- `browserslistQuery` (string, optional): Browserslist query string (e.g., "> 1%, last 2 versions")
+- `configPath` (string, optional): Path to .browserslistrc file
+- `projectPath` (string, optional): Path to project root with package.json or .browserslistrc
+
+**Example:**
+
+```text
+Check if array.at is compatible with my browserslist config: ">= 1%, not dead, Chrome >= 106, ios_saf >= 16"
+```
+
+**Response:**
+
+Returns compatibility results filtered by your target browsers:
+
+- Target browser list from your browserslist query
+- Feature support status for each target browser version
+- Identifies compatibility issues with specific browser versions
+- Combines data from CanIUse, MDN BCD, and Web Features
+
+**Use Cases:**
+
+- Validate new web features against your project's browser support policy
+- Check if a feature works in your target browsers before using it
+- Analyze compatibility with company-specific browserslist configurations
+- Ensure features work in specific browser version ranges
+
+#### 3. `list_tools`
 
 List all available tools and their descriptions.
 
@@ -114,6 +147,9 @@ List all available tools and their descriptions.
 
 ## caniuse-feature
 Look up the compatibility of web features across different browsers using data from caniuse.com.
+
+## browserslist-compatibility-check
+Check web feature compatibility against your browserslist configuration.
 
 ## list-tools  
 List all available tools and their descriptions
@@ -173,6 +209,7 @@ pnpm build
 src/
 ├── index.ts              # Main server entry point
 ├── lib/
+│   ├── browserslist.ts   # Browserslist query parser
 │   ├── caniuse-api.ts    # Caniuse API client
 │   ├── caniuse-db.ts     # Data processing utilities
 │   ├── compat-utils.ts   # Multi-source compatibility data aggregation
@@ -182,8 +219,11 @@ src/
 └── tools/
     ├── index.ts          # Tools registry
     ├── registry.ts       # Tool registration system
+    ├── browserslist-compat/
+    │   ├── index.ts      # Browserslist compatibility
+    │   └── schema.ts     # Input validation schemas
     ├── caniuse/
-    │   ├── index.ts      # Multi-source feature lookup tool
+    │   ├── index.ts      # Multi-source feature 
     │   └── schema.ts     # Input validation schemas
     └── list-tools/
         └── index.ts      # Tools listing functionality
@@ -209,6 +249,28 @@ Fetches compatibility data for a specified web feature.
 - Version-specific compatibility data
 - Implementation notes and caveats
 - Polyfill availability information
+
+### Tool: browserslist_compatibility_check
+
+Checks web feature compatibility against browserslist configuration.
+
+**Input Schema:**
+
+```typescript
+{
+  feature: string // Feature name to check
+  browserslistQuery?: string // Browserslist query string
+  configPath?: string // Path to .browserslistrc file
+  projectPath?: string // Path to project root
+}
+```
+
+**Output:**
+
+- Target browser list from browserslist query
+- Feature support status filtered by target browsers
+- Compatibility issues with specific browser versions
+- Combined data from CanIUse, MDN BCD, and Web Features
 
 ### Tool: list_tools
 
