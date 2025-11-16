@@ -35,6 +35,8 @@ jobs:
                   cache: 'pnpm'
                   cache-dependency-path: '**/pnpm-lock.yaml'
                   registry-url: 'https://registry.npmjs.org'
+                  # OIDC authentication - no token needed
+                  always-auth: true
             - name: Update npm
               run: npm install -g npm@latest
             - name: Install dependencies
@@ -47,10 +49,10 @@ jobs:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
             - name: Publish to NPM (OIDC)
               run: |
-                  if [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
-                    npm publish --provenance --access public
+                  if [[ "${{ github.ref }}" == "refs/heads/alpha" ]]; then
+                    npm publish --access public --tag alpha
+                  elif [[ "${{ github.ref }}" == "refs/heads/rc" ]]; then
+                    npm publish --access public --tag rc
                   else
-                    npm publish --provenance --access public --tag alpha
+                    npm publish --access public
                   fi
-              env:
-                  NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
