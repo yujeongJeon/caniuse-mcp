@@ -82,10 +82,13 @@ const executeBrowserslistCompat = async ({
         // 6. Format target browsers for display (abbreviated)
         const targetBrowsersList = Object.entries(targetVersions)
             .map(([browser, versions]) => {
-                if (versions.length <= 2) {
+                if (versions.length === 1) {
+                    return `${browser} ${versions[0]}`
+                } else if (versions.length <= 3) {
                     return `${browser} ${versions.join(', ')}`
                 }
-                return `${browser} ${versions[0]}-${versions[versions.length - 1]}`
+                // More than 3 versions: show count and sample
+                return `${browser} (${versions.length} versions: ${versions[0]}, ${versions[1]}, ...)`
             })
             .join(', ')
 
