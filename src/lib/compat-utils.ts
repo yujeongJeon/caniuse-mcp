@@ -14,7 +14,7 @@ import {
     parseMDNSupport,
     type SimplifiedMDNSupport,
 } from './mdn.js'
-import {fetchWebFeatures, WEBFEATURES_TO_CANIUSE_BROWSER_MAP, type WebFeatureVersionSupport} from './web-features.js'
+import {fetchWebFeatures, WEBFEATURES_TO_CANIUSE_BROWSER_MAP} from './web-features.js'
 
 export interface CompatibilityResult {
     source: 'caniuse' | 'mdn' | 'web-features'
@@ -22,7 +22,7 @@ export interface CompatibilityResult {
     path?: string
     title?: string
     description?: string
-    support: Record<string, GroupedVersionSupport[] | SimplifiedMDNSupport[] | WebFeatureVersionSupport[]>
+    support: Record<string, Record<string, string>> // browser -> { version: status }
     status?: any
     baseline?: {
         status: 'high' | 'low' | false
@@ -32,6 +32,63 @@ export interface CompatibilityResult {
     relatedFeatures?: {
         mdn?: string[] // Related MDN BCD identifiers
     }
+}
+
+/**
+ * Convert grouped version support to simple format
+ */
+function convertGroupedToSimple(grouped: GroupedVersionSupport[]): Record<string, string> {
+    const result: Record<string, string> = {}
+
+    for (const group of grouped) {
+        let value = group.status
+        const extras: string[] = []
+
+        if (group.requiresPrefix) extras.push('requires prefix')
+        if (group.requiresFlag) extras.push('requires flag')
+        if (group.hasPolyfill) extras.push('polyfill available')
+        if (group.notes && group.notes.length > 0) {
+            extras.push(...group.notes)
+        }
+
+        if (extras.length > 0) {
+            value += ` (${extras.join(', ')})`
+        }
+
+        // Extract first version from range
+        const version = group.versions.split('-')[0].replace('+', '')
+        result[version] = value
+    }
+
+    return result
+}
+
+/**
+ * Convert MDN support to simple format
+ */
+function convertMDNToSimple(mdnSupports: SimplifiedMDNSupport[]): Record<string, string> {
+    const result: Record<string, string> = {}
+
+    for (const support of mdnSupports) {
+        if (!support.sinceVersion) continue
+
+        let value = support.status
+        const extras: string[] = []
+
+        if (support.requiresPrefix) extras.push('requires prefix')
+        if (support.requiresFlag) extras.push('requires flag')
+        if (support.notes && support.notes.length > 0) {
+            extras.push(...support.notes)
+        }
+
+        if (extras.length > 0) {
+            value += ` (${extras.join(', ')})`
+        }
+
+        result[support.sinceVersion] = value
+    }
+
+    return result
 }
 
 /**
@@ -56,22 +113,20 @@ export async function searchAndFetchCompatData(featureIds: string[]): Promise<Co
             const webFeature = webFeaturesData[wfId]
 
             if (webFeature && webFeature.status?.support) {
-                const support: Record<string, WebFeatureVersionSupport[]> = {}
+                const support: Record<string, Record<string, string>> = {}
 
                 // Web Features의 support 데이터를 CanIUse 브라우저 이름으로 변환
                 for (const [wfBrowser, version] of Object.entries(webFeature.status.support)) {
                     const caniuseBrowser = WEBFEATURES_TO_CANIUSE_BROWSER_MAP[wfBrowser]
                     if (caniuseBrowser && version && CANIUSE_MAIN_BROWSERS.includes(caniuseBrowser)) {
-                        support[caniuseBrowser] = [
-                            {
-                                sinceVersion: version,
-                                status: 'supported',
-                            },
-                        ]
+                        support[caniuseBrowser] = {
+                            [version]: 'supported',
+                        }
                     }
                 }
 
-                // Web Feature의 compat_features를 MDN ID로 변환
+                // Only include related MDN IDs in Web Features, skip fetching actual data to avoid duplication
+                // Users can query separately using IDs from relatedFeatures.mdn if detailed information is needed
                 const mdnIds =
                     webFeature.compat_features?.map((bcdPath) => `mdn-${bcdPath.replace(/\./g, '_').toLowerCase()}`) ||
                     []
@@ -90,34 +145,6 @@ export async function searchAndFetchCompatData(featureIds: string[]): Promise<Co
                     },
                     relatedFeatures: mdnIds.length > 0 ? {mdn: mdnIds} : undefined,
                 })
-
-                // 연관된 MDN 데이터도 함께 가져오기
-                for (const mdnId of mdnIds) {
-                    const bcdPath = mdnIdToBcdPath(mdnId)
-                    const compatData = getNestedProperty(mdnData, bcdPath)
-
-                    if (compatData?.__compat) {
-                        const mdnCompatData = compatData.__compat
-                        const mdnSupport: Record<string, SimplifiedMDNSupport[]> = {}
-
-                        for (const browser of MDN_MAIN_BROWSERS) {
-                            const browserData = mdnCompatData.support[browser]
-                            if (browserData) {
-                                mdnSupport[browser] = parseMDNSupport(browserData)
-                            }
-                        }
-
-                        results.push({
-                            source: 'mdn',
-                            id: mdnId,
-                            title: mdnCompatData.description || bcdPath,
-                            description: mdnCompatData.mdn_url,
-                            path: mdnCompatData.spec_url,
-                            status: mdnCompatData.status,
-                            support: mdnSupport,
-                        })
-                    }
-                }
             }
         } else if (featureId.startsWith('mdn-')) {
             // MDN 데이터에서 찾기
@@ -126,12 +153,13 @@ export async function searchAndFetchCompatData(featureIds: string[]): Promise<Co
 
             if (compatData?.__compat) {
                 const mdnCompatData = compatData.__compat
-                const support: Record<string, SimplifiedMDNSupport[]> = {}
+                const support: Record<string, Record<string, string>> = {}
 
                 for (const browser of MDN_MAIN_BROWSERS) {
                     const browserData = mdnCompatData.support[browser]
                     if (browserData) {
-                        support[browser] = parseMDNSupport(browserData)
+                        const parsed = parseMDNSupport(browserData)
+                        support[browser] = convertMDNToSimple(parsed)
                     }
                 }
 
@@ -157,11 +185,12 @@ export async function searchAndFetchCompatData(featureIds: string[]): Promise<Co
             const agents = caniuseData.agents
             const notesByNum = compatData.notes_by_num
 
-            const result: Record<string, GroupedVersionSupport[]> = {}
+            const support: Record<string, Record<string, string>> = {}
 
             for (const browser of CANIUSE_MAIN_BROWSERS) {
                 if (compatData.stats[browser] && agents[browser]) {
-                    result[browser] = groupBrowserVersions(compatData.stats[browser], agents[browser], notesByNum)
+                    const grouped = groupBrowserVersions(compatData.stats[browser], agents[browser], notesByNum)
+                    support[browser] = convertGroupedToSimple(grouped)
                 }
             }
 
@@ -170,7 +199,7 @@ export async function searchAndFetchCompatData(featureIds: string[]): Promise<Co
                 id: featureId,
                 title: compatData.title,
                 description: compatData.description,
-                support: result,
+                support,
             })
         }
     }
@@ -208,77 +237,6 @@ export function compareVersion(a: string, b: string): number {
 }
 
 /**
- * Check if a target version is within a version range string
- * Handles formats like: "122", "15-17", "122+", "15-17.1"
- */
-export function isVersionInRange(targetVersion: string, versionRange: string): boolean {
-    // "122+" 형태: targetVersion >= 122
-    if (versionRange.endsWith('+')) {
-        const minVersion = versionRange.slice(0, -1)
-        return compareVersion(targetVersion, minVersion) >= 0
-    }
-
-    // "15-17" 형태: 15 <= targetVersion <= 17
-    if (versionRange.includes('-')) {
-        const [minVersion, maxVersion] = versionRange.split('-')
-        return compareVersion(targetVersion, minVersion) >= 0 && compareVersion(targetVersion, maxVersion) <= 0
-    }
-
-    // "122" 형태: 정확히 일치
-    return compareVersion(targetVersion, versionRange) === 0
-}
-
-/**
- * Filter GroupedVersionSupport[] to only include entries that match target versions
- */
-export function filterGroupedVersionSupport(
-    groupedSupport: GroupedVersionSupport[],
-    targetVersions: string[],
-): GroupedVersionSupport[] {
-    return groupedSupport.filter((group) => {
-        // 타겟 버전 중 하나라도 이 그룹의 범위에 포함되면 유지
-        return targetVersions.some((targetVersion) => isVersionInRange(targetVersion, group.versions))
-    })
-}
-
-/**
- * Filter SimplifiedMDNSupport[] to only include entries relevant to target versions
- */
-export function filterMDNSupport(mdnSupport: SimplifiedMDNSupport[], targetVersions: string[]): SimplifiedMDNSupport[] {
-    return mdnSupport.filter((support) => {
-        // sinceVersion이 없으면 (unknown 등) 일단 포함
-        if (!support.sinceVersion) return true
-
-        // 타겟 버전 중 하나라도 sinceVersion 이상이면 포함
-        return targetVersions.some((targetVersion) => {
-            const isAfterSince = compareVersion(targetVersion, support.sinceVersion!) >= 0
-
-            // untilVersion이 있으면 그보다 이전인지도 확인
-            if (support.untilVersion) {
-                return isAfterSince && compareVersion(targetVersion, support.untilVersion) < 0
-            }
-
-            return isAfterSince
-        })
-    })
-}
-
-/**
- * Filter WebFeatureVersionSupport[] to only include if target versions meet the requirement
- */
-export function filterWebFeatureSupport(
-    webFeatureSupport: WebFeatureVersionSupport[],
-    targetVersions: string[],
-): WebFeatureVersionSupport[] {
-    return webFeatureSupport.filter((support) => {
-        // 타겟 버전 중 하나라도 sinceVersion 이상이면 포함
-        return targetVersions.some((targetVersion) => {
-            return compareVersion(targetVersion, support.sinceVersion) >= 0
-        })
-    })
-}
-
-/**
  * Filter compatibility results by target browser versions
  */
 export function filterCompatibilityByVersions(
@@ -286,10 +244,7 @@ export function filterCompatibilityByVersions(
     targetBrowserVersions: Record<string, string[]>,
 ): CompatibilityResult[] {
     return results.map((result) => {
-        const filteredSupport: Record<
-            string,
-            GroupedVersionSupport[] | SimplifiedMDNSupport[] | WebFeatureVersionSupport[]
-        > = {}
+        const filteredSupport: Record<string, Record<string, string>> = {}
 
         for (const [browser, versionSupport] of Object.entries(result.support)) {
             // MDN의 경우 browser 이름을 CanIUse 형식으로 변환해서 매칭
@@ -306,18 +261,17 @@ export function filterCompatibilityByVersions(
 
             if (!targetVersions || targetVersions.length === 0) continue
 
-            if (result.source === 'caniuse') {
-                filteredSupport[browser] = filterGroupedVersionSupport(
-                    versionSupport as GroupedVersionSupport[],
-                    targetVersions,
-                )
-            } else if (result.source === 'mdn') {
-                filteredSupport[browser] = filterMDNSupport(versionSupport as SimplifiedMDNSupport[], targetVersions)
-            } else if (result.source === 'web-features') {
-                filteredSupport[browser] = filterWebFeatureSupport(
-                    versionSupport as WebFeatureVersionSupport[],
-                    targetVersions,
-                )
+            // 간단한 필터링: 타겟 버전에 해당하는 항목만 유지
+            const filtered: Record<string, string> = {}
+            for (const [version, status] of Object.entries(versionSupport)) {
+                // 타겟 버전 중 하나라도 이 버전 이상이면 포함
+                if (targetVersions.some((tv) => compareVersion(tv, version) >= 0)) {
+                    filtered[version] = status
+                }
+            }
+
+            if (Object.keys(filtered).length > 0) {
+                filteredSupport[browser] = filtered
             }
         }
 
