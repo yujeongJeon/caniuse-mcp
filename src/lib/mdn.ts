@@ -145,11 +145,23 @@ export function mdnIdToBcdPath(mdnId: string): string {
 }
 
 export async function fetchMDNData() {
-    const mdnData = await fetch(DATA_SOURCES.mdn, {
-        cache: 'force-cache',
-        headers: {
-            'Cache-Control': 'max-age=2592000',
-        },
-    }).then((r) => r.json())
-    return mdnData
+    try {
+        const response = await fetch(DATA_SOURCES.mdn, {
+            cache: 'force-cache',
+            headers: {
+                'Cache-Control': 'max-age=2592000',
+            },
+        })
+
+        if (!response.ok) {
+            throw new Error(`Failed to fetch MDN data: ${response.statusText}`)
+        }
+
+        const text = await response.text()
+        const mdnData = JSON.parse(text)
+        return mdnData
+    } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : String(error)
+        throw new Error(`Failed to fetch or parse MDN data: ${errorMessage}`)
+    }
 }
