@@ -1,3 +1,10 @@
+## [1.1.2](https://github.com/yujeongJeon/caniuse-mcp/compare/v1.1.1...v1.1.2) (2025-11-16)
+
+
+### Bug Fixes
+
+* add browserslist compatibility check tool with detailed usage instructions ([cc0d9e1](https://github.com/yujeongJeon/caniuse-mcp/commit/cc0d9e11addbdcf4a041d23fe19515cb03a8548b))
+
 ## [1.1.1](https://github.com/yujeongJeon/caniuse-mcp/compare/v1.1.0...v1.1.1) (2025-11-16)
 
 
