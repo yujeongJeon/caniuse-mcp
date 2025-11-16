@@ -41,7 +41,8 @@
         "prettier:fix": "prettier --write ."
     },
     "dependencies": {
-        "fastmcp": "^3.17.0",
+        "@modelcontextprotocol/sdk": "1.21.2",
+        "fastmcp": "^3.23.0",
         "zod": "^3.25.76"
     },
     "devDependencies": {
