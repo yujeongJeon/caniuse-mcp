@@ -1,3 +1,10 @@
+# [1.1.0-alpha.2](https://github.com/yujeongJeon/caniuse-mcp/compare/v1.1.0-alpha.1...v1.1.0-alpha.2) (2025-11-16)
+
+
+### Bug Fixes
+
+* update dependencies in package.json and pnpm-lock.yaml ([4bd3552](https://github.com/yujeongJeon/caniuse-mcp/commit/4bd35524d2388cce1be54db5bb634ad2aa73c7d8))
+
 # [1.1.0-alpha.1](https://github.com/yujeongJeon/caniuse-mcp/compare/v1.0.1...v1.1.0-alpha.1) (2025-11-16)
 
 
