@@ -2,6 +2,9 @@ import {readFile} from 'fs/promises'
 import {join, resolve} from 'path'
 
 import {browserslistCompatInputSchema, type BrowserslistCompatInputSchema} from './schema.js'
+import {parseBrowserslistQuery, extractTargetBrowserVersions} from '../../lib/browserslist.js'
+import {fetchCanIUseQueries} from '../../lib/caniuse-api.js'
+import {searchAndFetchCompatData, filterCompatibilityByVersions} from '../../lib/compat-utils.js'
 
 async function loadBrowserslistConfig(configPath?: string, projectPath?: string): Promise<string> {
     if (configPath) {
@@ -47,6 +50,7 @@ const executeBrowserslistCompat = async ({
     projectPath,
 }: BrowserslistCompatInputSchema) => {
     try {
+        // 1. Load browserslist query
         let query = browserslistQuery
         if (!query) {
             query = await loadBrowserslistConfig(configPath, projectPath)
@@ -54,13 +58,48 @@ const executeBrowserslistCompat = async ({
             query = query.join(', ')
         }
 
-        // TODO Implement browserslist-compat
+        // 2. Parse browserslist to get target browser versions
+        const browserslistData = await parseBrowserslistQuery(query)
+        const targetVersions = extractTargetBrowserVersions(browserslistData)
+
+        // 3. Search for feature IDs
+        const queries = await fetchCanIUseQueries(feature)
+
+        // Notify if multiple features found
+        let multipleFeatureNote = ''
+        if (queries.featureIds.length > 1) {
+            multipleFeatureNote = `\n> **Note:** Multiple features found matching "${feature}": ${queries.featureIds.join(
+                ', ',
+            )}\n> Showing compatibility for all matching features.\n\n`
+        }
+
+        // 4. Fetch compatibility data for all features
+        const compatResults = await searchAndFetchCompatData(queries.featureIds)
+
+        // 5. Filter by target browser versions
+        const filteredResults = filterCompatibilityByVersions(compatResults, targetVersions)
+
+        // 6. Format target browsers for display (abbreviated)
+        const targetBrowsersList = Object.entries(targetVersions)
+            .map(([browser, versions]) => {
+                if (versions.length <= 2) {
+                    return `${browser} ${versions.join(', ')}`
+                }
+                return `${browser} ${versions[0]}-${versions[versions.length - 1]}`
+            })
+            .join(', ')
 
         return {
             content: [
                 {
                     type: 'text',
-                    text: `# Browserslist Compatibility Check Result for "${feature}"\n\n`,
+                    text:
+                        `# Browserslist Compatibility Check for "${feature}"\n\n` +
+                        `**Query:** \`${query}\`\n` +
+                        `**Target Browsers:** ${targetBrowsersList}\n` +
+                        multipleFeatureNote +
+                        '\n---\n\n' +
+                        JSON.stringify(filteredResults, null, 2),
                 },
             ],
         }

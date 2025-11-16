@@ -26,3 +26,26 @@ export async function parseBrowserslistQuery(browserslistQuery: string): Promise
 
     return (await response.json()) satisfies BrowserslistApiResponse
 }
+
+/**
+ * Extract target browser versions from browserslist API response
+ * @returns Record<browserId, versions[]> e.g., { chrome: ['122', '123'], safari: ['15.0'] }
+ */
+export function extractTargetBrowserVersions(browserslistData: BrowserslistApiResponse): Record<string, string[]> {
+    const targetVersions: Record<string, string[]> = {}
+
+    for (const browser of browserslistData.browsers) {
+        const versions = Object.keys(browser.versions).sort((a, b) => {
+            // Sort versions in ascending order
+            const [aMajor] = a.split('.').map(Number)
+            const [bMajor] = b.split('.').map(Number)
+            return aMajor - bMajor
+        })
+
+        if (versions.length > 0) {
+            targetVersions[browser.id] = versions
+        }
+    }
+
+    return targetVersions
+}

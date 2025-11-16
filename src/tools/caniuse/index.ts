@@ -1,106 +1,15 @@
 import {caniuseInputSchema, type CaniUseInputSchema} from './schema.js'
-import {fetchCanIUse, fetchCanIUseQueries} from '../../lib/caniuse-api.js'
-import {
-    groupBrowserVersions,
-    CANIUSE_MAIN_BROWSERS,
-    type FeatureData,
-    type GroupedVersionSupport,
-} from '../../lib/caniuse-db.js'
-import {
-    fetchMDNData,
-    getNestedProperty,
-    MDN_MAIN_BROWSERS,
-    mdnIdToBcdPath,
-    parseMDNSupport,
-    type SimplifiedMDNSupport,
-} from '../../lib/mdn.js'
+import {fetchCanIUseQueries} from '../../lib/caniuse-api.js'
+import {searchAndFetchCompatData} from '../../lib/compat-utils.js'
 
 import type {FastMCPContext} from '../registry.js'
 import type {AudioContent, ImageContent, TextContent} from 'fastmcp'
 
-interface CompatibilityResult {
-    source: 'caniuse' | 'mdn'
-    id: string
-    path?: string
-    title?: string
-    description?: string
-    support: any
-    status?: any
-}
-
-async function searchAndFetchCompatData(featureIds: string[]): Promise<CompatibilityResult[]> {
-    const results: CompatibilityResult[] = []
-
-    // caniuse-db 데이터 로드
-    const caniuseData = await fetchCanIUse()
-
-    // MDN 데이터 로드
-    const mdnData = await fetchMDNData()
-
-    for (const featureId of featureIds) {
-        if (featureId.startsWith('mdn-')) {
-            // MDN 데이터에서 찾기
-            const bcdPath = mdnIdToBcdPath(featureId)
-            const compatData = getNestedProperty(mdnData, bcdPath)
-
-            if (compatData?.__compat) {
-                const mdnCompatData = compatData.__compat
-                const support: Record<string, SimplifiedMDNSupport[]> = {}
-
-                for (const browser of MDN_MAIN_BROWSERS) {
-                    const browserData = mdnCompatData.support[browser]
-                    if (browserData) {
-                        support[browser] = parseMDNSupport(browserData)
-                    }
-                }
-
-                results.push({
-                    source: 'mdn',
-                    id: featureId,
-                    title: mdnCompatData.description || bcdPath,
-                    description: mdnCompatData.mdn_url,
-                    path: mdnCompatData.spec_url,
-                    status: mdnCompatData.status,
-                    support,
-                })
-            }
-        } else {
-            const compatData: FeatureData = caniuseData.data[featureId]
-
-            if (!compatData) {
-                // eslint-disable-next-line no-console
-                console.error(`Feature ID "${featureId}" not found in caniuse data.`)
-                continue
-            }
-
-            const agents = caniuseData.agents
-            const notesByNum = compatData.notes_by_num
-
-            const result: Record<string, GroupedVersionSupport[]> = {}
-
-            for (const browser of CANIUSE_MAIN_BROWSERS) {
-                if (compatData.stats[browser] && agents[browser]) {
-                    result[browser] = groupBrowserVersions(compatData.stats[browser], agents[browser], notesByNum)
-                }
-            }
-
-            results.push({
-                source: 'caniuse',
-                id: featureId,
-                title: compatData.title,
-                description: compatData.description,
-                support: result,
-            })
-        }
-    }
-
-    return results
-}
-
-const executeCaniuse = async ({feature}: CaniUseInputSchema, {session}: FastMCPContext) => {
+const executeCaniuse = async ({feature}: CaniUseInputSchema, ctx: FastMCPContext) => {
     // 1. caniuse.com 검색 API로 feature ID들 가져오기
     const queries = await fetchCanIUseQueries(feature)
 
+    const session = ctx?.session
     if (session?.clientCapabilities?.sampling && typeof session?.requestSampling === 'function') {
         const response: {
             content: AudioContent | ImageContent | TextContent
