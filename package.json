@@ -1,6 +1,6 @@
 {
     "name": "caniuse-mcp",
-    "version": "1.0.1",
+    "version": "1.1.0-alpha.1",
     "description": "MCP server providing browser compatibility data and web API support information using caniuse database",
     "keywords": [
         "mcp",
@@ -11,6 +11,10 @@
     "bugs": {
         "email": "workingnewjeong@gmail.com",
         "url": "https://github.com/yujeongJeon/caniuse-mcp/issues"
+    },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/yujeongJeon/caniuse-mcp.git"
     },
     "license": "MIT",
     "author": "yujeongJeon <workingnewjeong@gmail.com>",

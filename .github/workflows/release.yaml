@@ -35,11 +35,22 @@ jobs:
                   cache: 'pnpm'
                   cache-dependency-path: '**/pnpm-lock.yaml'
                   registry-url: 'https://registry.npmjs.org'
+            - name: Update npm
+              run: npm install -g npm@latest
             - name: Install dependencies
               run: pnpm i --frozen-lockfile
             - name: Build
               run: pnpm build
-            - name: Release
+            - name: Semantic Release
               run: pnpm semantic-release
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+            - name: Publish to NPM (OIDC)
+              run: |
+                  if [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
+                    npm publish --provenance --access public
+                  else
+                    npm publish --provenance --access public --tag alpha
+                  fi
+              env:
+                  NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
