@@ -211,8 +211,16 @@ export function compareVersion(a: string, b: string): number {
     if (a === 'TP') return 1
     if (b === 'TP') return -1
 
-    const aParts = a.split(/[.-]/).map((x) => parseInt(x, 10) || 0)
-    const bParts = b.split(/[.-]/).map((x) => parseInt(x, 10) || 0)
+    // '+' 제거 (17.4+ -> 17.4)
+    const cleanA = a.replace('+', '')
+    const cleanB = b.replace('+', '')
+
+    // range 처리 (10-12 -> 10)
+    const versionA = cleanA.split('-')[0]
+    const versionB = cleanB.split('-')[0]
+
+    const aParts = versionA.split('.').map((x) => parseInt(x, 10) || 0)
+    const bParts = versionB.split('.').map((x) => parseInt(x, 10) || 0)
 
     const maxLength = Math.max(aParts.length, bParts.length)
 
@@ -226,6 +234,54 @@ export function compareVersion(a: string, b: string): number {
     }
 
     return 0
+}
+
+/**
+ * Check if a target version is within a version range or matches a version
+ * @param versionOrRange - Version string (e.g., "15.4", "15.4+", "10-12")
+ * @param targetVersion - Target version to check (can also be a range)
+ * @returns true if target version is within range or >= version
+ */
+export function isVersionInRange(versionOrRange: string, targetVersion: string): boolean {
+    // "all" 같은 특수 케이스는 항상 포함
+    if (versionOrRange === 'all' || targetVersion === 'all') return true
+
+    // '+' 제거
+    const cleanVersion = versionOrRange.replace('+', '')
+    const cleanTarget = targetVersion.replace('+', '')
+
+    // 둘 다 range인 경우: 범위가 겹치는지 확인
+    if (cleanVersion.includes('-') && cleanTarget.includes('-')) {
+        const [featureMin, featureMax] = cleanVersion.split('-')
+        const [targetMin, targetMax] = cleanTarget.split('-')
+
+        // 범위 겹침 확인: featureMin <= targetMax && targetMin <= featureMax
+        return compareVersion(featureMin, targetMax) <= 0 && compareVersion(targetMin, featureMax) <= 0
+    }
+
+    // feature가 range인 경우
+    if (cleanVersion.includes('-')) {
+        const [minVer, maxVer] = cleanVersion.split('-')
+
+        // target이 range면 target의 최소 버전이 feature range 안에 있는지 확인
+        if (cleanTarget.includes('-')) {
+            const targetMin = cleanTarget.split('-')[0]
+            return compareVersion(targetMin, minVer) >= 0 && compareVersion(targetMin, maxVer) <= 0
+        }
+
+        // target이 단일 버전이면 그 버전이 range 안에 있는지 확인
+        return compareVersion(cleanTarget, minVer) >= 0 && compareVersion(cleanTarget, maxVer) <= 0
+    }
+
+    // target이 range인 경우 (feature는 단일 버전)
+    if (cleanTarget.includes('-')) {
+        const [_targetMin, targetMax] = cleanTarget.split('-')
+        // target range의 최대 버전이 feature 버전 이상이면 포함
+        return compareVersion(targetMax, cleanVersion) >= 0
+    }
+
+    // 둘 다 단일 버전: targetVersion >= versionOrRange
+    return compareVersion(cleanTarget, cleanVersion) >= 0
 }
 
 /**
@@ -256,8 +312,8 @@ export function filterCompatibilityByVersions(
             // 간단한 필터링: 타겟 버전에 해당하는 항목만 유지
             const filtered: Record<string, string> = {}
             for (const [version, status] of Object.entries(versionSupport)) {
-                // 타겟 버전 중 하나라도 이 버전 이상이면 포함
-                if (targetVersions.some((tv) => compareVersion(tv, version) >= 0)) {
+                // feature 지원 버전이 타겟 버전 범위에 포함되면 포함
+                if (targetVersions.some((tv) => isVersionInRange(version, tv))) {
                     filtered[version] = status
                 }
             }
